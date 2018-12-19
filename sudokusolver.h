@@ -14,9 +14,14 @@ class SudokuSolver : public QMainWindow
 public:
     explicit SudokuSolver(QWidget *parent = nullptr);
     ~SudokuSolver();
+    void genNumbers();
+
+private slots:
+    void on_pushButton_clicked();
 
 private:
     Ui::SudokuSolver *ui;
+
 };
 
 #endif // SUDOKUSOLVER_H
