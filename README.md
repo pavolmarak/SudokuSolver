@@ -1,4 +1,4 @@
-# SudokuSolver
+# Sudoku Solver
 
 Screenshot of the current version of my application. It does not correctly populate the initial solved board.
 
