@@ -80,12 +80,16 @@ void SudokuSolver::genNumbers()
         for (int j=0;j< ui->tableWidget->columnCount();j++) {
 
             int r = QRandomGenerator::securelySeeded().generate()%9+1;
+            int cnt = 0;
             while(!checkVal(ui->tableWidget,i,j,r)){
                 r = ++r%10;
                 if(r==0){
                     r++;
                 }
-
+                cnt++;
+                if(cnt>9){
+                    break;
+                }
 
             }
             qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setText(QString::number(r));
