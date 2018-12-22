@@ -60,13 +60,10 @@ SudokuSolver::SudokuSolver(QWidget *parent) :
 
             ui->tableWidget->setCellWidget(i,j,new QLabel(QString::number(0)));
             qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setAlignment(Qt::AlignCenter);
+            qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setStyleSheet("border: 1px solid blue;");
 
         }
     }
-
-
-
-
 }
 
 SudokuSolver::~SudokuSolver()
