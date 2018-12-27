@@ -4,66 +4,18 @@
 #include <QLabel>
 #include <QDebug>
 #include <QRandomGenerator>
-
-bool checkVal(QTableWidget* t, int row, int col, int val){
-    //check row
-    for(int i=0;i<9;i++){
-        if(qobject_cast<QLabel*>(t->cellWidget(row,i))->text().toInt() == val){
-
-            return false;
-        }
-
-    }
-    //check col
-    for(int i=0;i<9;i++){
-        if(qobject_cast<QLabel*>(t->cellWidget(i,col))->text().toInt() == val){
-
-            return false;
-        }
-
-    }
-
-    //check 3x3 box
-    int box_r = floor(row/3.0)*3;
-    int box_c = floor(col/3.0)*3;
-    for(int i=box_r; i<box_r+3;i++){
-        for(int j=box_c;j<box_c+3;j++){
-            if(qobject_cast<QLabel*>(t->cellWidget(i,j))->text().toInt() == val){
-
-                return false;
-            }
-        }
-    }
-    return true;
-
-}
+#include <QSet>
 
 SudokuSolver::SudokuSolver(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::SudokuSolver)
+    ui(new Ui::SudokuSolver),
+    sudoku_board(SUDOKU_BOARD_SIDE)
 {
     ui->setupUi(this);
-    ui->tableWidget->setRowCount(9);
-    ui->tableWidget->setColumnCount(9);
-    for (int i=0;i< ui->tableWidget->rowCount();i++) {
-        ui->tableWidget->setRowHeight(i,50);
-    }
+    this->createBoardUI();
 
-    for (int i=0;i< ui->tableWidget->columnCount();i++) {
-        ui->tableWidget->setColumnWidth(i,50);
-    }
-    ui->tableWidget->setMinimumSize(452,452);
-    ui->tableWidget->setMaximumSize(452,452);
+    connect(ui->tableWidget, SIGNAL(itemClicked(QTableWidgetItem*)), this, SLOT(onItemClicked(QTableWidgetItem*)));
 
-    for (int i=0;i< ui->tableWidget->rowCount();i++) {
-        for (int j=0;j< ui->tableWidget->columnCount();j++) {
-
-            ui->tableWidget->setCellWidget(i,j,new QLabel(QString::number(0)));
-            qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setAlignment(Qt::AlignCenter);
-            qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setStyleSheet("border: 1px solid blue;");
-
-        }
-    }
 }
 
 SudokuSolver::~SudokuSolver()
@@ -71,31 +23,76 @@ SudokuSolver::~SudokuSolver()
     delete ui;
 }
 
-void SudokuSolver::genNumbers()
+void SudokuSolver::onItemClicked(QTableWidgetItem* item)
 {
+    resetBoardColorUI();
+    //qDebug() << item->text();
+    QVector<QPoint> vp = sudoku_board.getNeighbors(QPoint(item->row(),item->column()));
+    for(const QPoint& p : vp){
+        //ui->tableWidget->item(p.y(),p.x())->setBackground(QBrush(QColor(128, 77, 0)));
+        ui->tableWidget->item(p.y(),p.x())->setSelected(true);
+    }
+
+}
+
+void SudokuSolver::createBoardUI()
+{
+    // set up dimensions
+    ui->tableWidget->setRowCount(SUDOKU_BOARD_SIDE);
+    ui->tableWidget->setColumnCount(SUDOKU_BOARD_SIDE);
+    for (int i=0;i< ui->tableWidget->rowCount();i++) {
+        ui->tableWidget->setRowHeight(i,SUDOKU_CELL_SIZE);
+    }
+
+    for (int i=0;i< ui->tableWidget->columnCount();i++) {
+        ui->tableWidget->setColumnWidth(i,SUDOKU_CELL_SIZE);
+    }
+    ui->tableWidget->setMinimumSize(SUDOKU_BOARD_SIDE*SUDOKU_CELL_SIZE+2,SUDOKU_BOARD_SIDE*SUDOKU_CELL_SIZE+2);
+    ui->tableWidget->setMaximumSize(SUDOKU_BOARD_SIDE*SUDOKU_CELL_SIZE+2,SUDOKU_BOARD_SIDE*SUDOKU_CELL_SIZE+2);
+
+    // generate initial values
     for (int i=0;i< ui->tableWidget->rowCount();i++) {
         for (int j=0;j< ui->tableWidget->columnCount();j++) {
+            ui->tableWidget->setItem(i,j,new QTableWidgetItem(QString::number(0)));
+            ui->tableWidget->item(i,j)->setFont(QFont("Tahoma",12));
+            ui->tableWidget->item(i,j)->setTextAlignment(Qt::AlignCenter);
+            ui->tableWidget->item(i,j)->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);
+        }
+    }
 
-            int r = QRandomGenerator::securelySeeded().generate()%9+1;
-            int cnt = 0;
-            while(!checkVal(ui->tableWidget,i,j,r)){
-                r = ++r%10;
-                if(r==0){
-                    r++;
-                }
-                cnt++;
-                if(cnt>9){
-                    break;
-                }
+    resetBoardColorUI();
+}
 
-            }
-            qobject_cast<QLabel*>(ui->tableWidget->cellWidget(i,j))->setText(QString::number(r));
-            qApp->processEvents();
+void SudokuSolver::resetBoardColorUI()
+{
+    QVector<QVector<QRgb>> colorbox;
+    colorbox.push_back({PRIMARY_COLOR,SECONDARY_COLOR,PRIMARY_COLOR});
+    colorbox.push_back({SECONDARY_COLOR,PRIMARY_COLOR,SECONDARY_COLOR});
+    colorbox.push_back({PRIMARY_COLOR,SECONDARY_COLOR,PRIMARY_COLOR});
+
+    for(int i=0; i<ui->tableWidget->rowCount();i++){
+        for(int j =0; j< ui->tableWidget->columnCount();j++){
+            int box_r = floor(i/3.0); // row index of the box top left position
+            int box_c = floor(j/3.0); // column index of the box top left position
+            ui->tableWidget->item(i,j)->setBackground(QBrush(QColor(colorbox[box_r][box_c])));
+            ui->tableWidget->item(i,j)->setSelected(false);
         }
     }
 }
 
 void SudokuSolver::on_pushButton_clicked()
 {
-    genNumbers();
+    resetBoardColorUI();
+    sudoku_board.clear();
+    sudoku_board.generate();
+    //board.print();
+    //qDebug() << sudoku_board.isOk();
+    auto brd = sudoku_board.getBoard();
+    // generate initial values
+    for (int i=0;i< ui->tableWidget->rowCount();i++) {
+        for (int j=0;j< ui->tableWidget->columnCount();j++) {
+            ui->tableWidget->item(i,j)->setText(QString::number(brd[i][j]));
+        }
+    }
 }
+
