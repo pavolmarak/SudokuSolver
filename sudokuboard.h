@@ -9,7 +9,7 @@
 #define SUDOKU_BOARD_SIDE 9
 #define SUDOKU_CELL_SIZE 50
 
-#define PRIMARY_COLOR qRgb(255, 195, 77)
+#define PRIMARY_COLOR qRgb(0, 204, 255)
 #define SECONDARY_COLOR qRgb(255, 255, 255)
 
 typedef unsigned char val;
