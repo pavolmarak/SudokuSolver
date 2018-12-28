@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include "sudokuboard.h"
 #include <QTableWidgetItem>
-
+#include <QMouseEvent>
 
 namespace Ui {
 class SudokuSolver;
@@ -19,13 +19,17 @@ public:
     ~SudokuSolver();
 
 private slots:
-    void on_pushButton_clicked();
     void onItemClicked(QTableWidgetItem*);
+    void onItemEntered(QTableWidgetItem*);
+    void on_regenarateBoardButton_clicked();
+
+    void on_unhighlightButton_clicked();
 
 private:
     Ui::SudokuSolver *ui;
     void createBoardUI();
     void resetBoardColorUI();
+    void generateBoardUI();
     SudokuBoard sudoku_board;
 
 };
