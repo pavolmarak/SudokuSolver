@@ -11,9 +11,9 @@ typedef unsigned char val;
 #define SUDOKU_BOARD_SIDE 9
 #define SUDOKU_CELL_SIZE 50
 
-#define PRIMARY_COLOR qRgb(0, 204, 255)
+#define PRIMARY_COLOR qRgb(230,230,230)
 #define SECONDARY_COLOR qRgb(255, 255, 255)
-#define SELECTION_COLOR qRgb(85,85,85)
+#define SELECTION_COLOR qRgb(0, 163, 204)
 
 #define DEFAULT_CANDIDATES QSet<val>{1,2,3,4,5,6,7,8,9}
 
