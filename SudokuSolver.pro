@@ -26,14 +26,12 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        sudokusolver.cpp \
     sudokuboard.cpp \
-    sudokutable.cpp
+    sudoku.cpp
 
 HEADERS += \
-        sudokusolver.h \
     sudokuboard.h \
-    sudokutable.h
+    sudoku.h
 
 FORMS += \
         sudokusolver.ui
